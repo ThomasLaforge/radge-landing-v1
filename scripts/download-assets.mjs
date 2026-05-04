@@ -34,6 +34,11 @@ const PATTERNS = [
   /https:\/\/fonts\.gstatic\.com\/([^"'\s)]+)/g,
 ];
 
+const RELATIVE_IMPORT_PATTERNS = [
+  /(?:\bfrom\s*|\bimport\s*\(\s*)["'`](\.\.?\/[^"'`]+)["'`]\s*\)?/g,
+  /new URL\(\s*["'`](\.\.?\/[^"'`]+)["'`]\s*,\s*import\.meta\.url\s*\)/g,
+];
+
 const downloads = new Map(); // originalUrl (no query) → localPath + publicPath
 
 function register(url, dir, subdir) {
@@ -91,19 +96,20 @@ async function recursiveScan(localPath, baseUrl) {
     }
   }
 
-  // 2. Find relative imports in MJS (e.g., from "./react.BnaEj7Xr.mjs")
-  const RELATIVE_PATTERN = /import\s*\(?['"](\.\/[^'"]+)['"]\)?/g;
-  let m;
-  while ((m = RELATIVE_PATTERN.exec(content)) !== null) {
-    const rel = m[1];
-    const full = new URL(rel, baseUrl).href;
-    const clean = full.split('?')[0];
-    
-    if (!downloads.has(clean)) {
-      console.log(`Found relative asset: ${clean}`);
-      register(full, 'sites', 'fs');
-      await downloadFile(clean, downloads.get(clean).localPath);
-      if (clean.endsWith('.mjs')) await recursiveScan(downloads.get(clean).localPath, clean.substring(0, clean.lastIndexOf('/') + 1));
+  // 2. Find relative imports in MJS, including dynamic imports with template literals.
+  for (const pattern of RELATIVE_IMPORT_PATTERNS) {
+    let m;
+    while ((m = pattern.exec(content)) !== null) {
+      const rel = m[1];
+      const full = new URL(rel, baseUrl).href;
+      const clean = full.split('?')[0];
+
+      if (!downloads.has(clean)) {
+        console.log(`Found relative asset: ${clean}`);
+        register(full, 'sites', 'fs');
+        await downloadFile(clean, downloads.get(clean).localPath);
+        if (clean.endsWith('.mjs')) await recursiveScan(downloads.get(clean).localPath, clean.substring(0, clean.lastIndexOf('/') + 1));
+      }
     }
   }
 }
@@ -157,7 +163,7 @@ async function downloadAll() {
     }
   }
 
-  console.log(`\nFinal: ok: ${ok}, total: ${downloads.size}.\n`);
+  console.log(`\nFinal: ok: ${ok}, fail: ${fail}, total: ${downloads.size}.\n`);
 }
 
 await downloadAll();
