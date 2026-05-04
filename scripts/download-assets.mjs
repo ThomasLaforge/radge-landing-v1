@@ -53,6 +53,7 @@ function register(url, dir, subdir) {
 
 // Scan patterns in HTML
 for (const pattern of PATTERNS) {
+  pattern.lastIndex = 0;
   let m;
   while ((m = pattern.exec(html)) !== null) {
     const full = m[0];
@@ -74,6 +75,7 @@ async function recursiveScan(localPath, baseUrl) {
   
   // 1. Find absolute URLs in MJS
   for (const pattern of PATTERNS) {
+    pattern.lastIndex = 0;
     let m;
     while ((m = pattern.exec(content)) !== null) {
       const full = m[0];
@@ -98,6 +100,7 @@ async function recursiveScan(localPath, baseUrl) {
 
   // 2. Find relative imports in MJS, including dynamic imports with template literals.
   for (const pattern of RELATIVE_IMPORT_PATTERNS) {
+    pattern.lastIndex = 0;
     let m;
     while ((m = pattern.exec(content)) !== null) {
       const rel = m[1];

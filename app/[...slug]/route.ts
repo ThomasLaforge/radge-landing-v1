@@ -1,9 +1,31 @@
-import { serveFramerHtml, serveFramerHtmlHead } from '../_lib/serve-framer-html';
+import type { NextRequest } from 'next/server';
 
-export function GET() {
-  return serveFramerHtml();
+import {
+  isMirroredAssetPath,
+  serveFramerHtml,
+  serveFramerHtmlHead,
+} from '../_lib/serve-framer-html';
+
+function notFound() {
+  return new Response('Not Found', { status: 404 });
 }
 
-export function HEAD() {
+export function GET(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (isMirroredAssetPath(pathname)) {
+    return notFound();
+  }
+
+  return serveFramerHtml(pathname);
+}
+
+export function HEAD(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (isMirroredAssetPath(pathname)) {
+    return notFound();
+  }
+
   return serveFramerHtmlHead();
 }
