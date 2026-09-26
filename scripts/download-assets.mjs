@@ -25,13 +25,13 @@ let html = readFileSync(HTML_SRC, 'utf8');
 
 const PATTERNS = [
   // framerusercontent images (may have query strings)
-  /https:\/\/framerusercontent\.com\/images\/([^"'\s)]+)/g,
+  /https:\/\/framerusercontent\.com\/images\/([^"'`\s)]+)/g,
   // framerusercontent assets (fonts + video)
-  /https:\/\/framerusercontent\.com\/assets\/([^"'\s)]+)/g,
+  /https:\/\/framerusercontent\.com\/assets\/([^"'`\s)]+)/g,
   // framerusercontent sites (JS modules + search indices)
-  /https:\/\/framerusercontent\.com\/sites\/([^"'\s)]+)/g,
+  /https:\/\/framerusercontent\.com\/sites\/([^"'`\s)]+)/g,
   // google fonts woff2
-  /https:\/\/fonts\.gstatic\.com\/([^"'\s)]+)/g,
+  /https:\/\/fonts\.gstatic\.com\/([^"'`\s)]+)/g,
 ];
 
 const RELATIVE_IMPORT_PATTERNS = [
